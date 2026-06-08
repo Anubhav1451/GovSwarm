@@ -5,6 +5,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.user_role import UserRole
 from app.services.audit_service import AuditService
+from app.core.security import decode_access_token
 from typing import List
 
 security = HTTPBearer()
@@ -14,7 +15,7 @@ async def get_current_user(
     db: Session = Depends(get_db)
 ) -> User:
     """
-    Get the current authenticated user from the Authorization header.
+    Get the current authenticated user from the JWT Bearer token.
     
     Args:
         credentials: HTTP Bearer credentials
@@ -28,18 +29,81 @@ async def get_current_user(
     """
     token = credentials.credentials
     
-    # For now, we'll use a simple token-based authentication
-    # In production, this would validate JWT tokens
-    user = db.query(User).filter(User.id == token).first()
-    
-    if not user:
+    # Decode and verify JWT token
+    payload = decode_access_token(token)
+    if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    user_id: str = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Fetch user from database
+    user = db.query(User).filter(User.id == user_id).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account is inactive"
+        )
+    
     return user
+
+
+async def get_current_active_auditor(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> User:
+    """
+    Get the current authenticated user and verify they are an active auditor.
+    
+    Args:
+        current_user: The authenticated user
+        db: Database session for audit logging
+        
+    Returns:
+        User object if authenticated and is an auditor
+        
+    Raises:
+        HTTPException: If user is not an auditor
+    """
+    if current_user.role != UserRole.AUDITOR and current_user.role != UserRole.ADMIN:
+        # Log unauthorized access attempt
+        AuditService.log_action(
+            db=db,
+            actor_id=current_user.id,
+            action="ACCESS_DENIED",
+            resource_type="auditor_only",
+            resource_id="",
+            metadata={
+                "required_role": "AUDITOR",
+                "actual_role": current_user.role.value,
+                "user_email": current_user.email,
+                "username": current_user.username
+            }
+        )
+        
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Auditor role required."
+        )
+    
+    return current_user
 
 
 class RoleChecker:

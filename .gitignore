@@ -78,3 +78,6 @@ Thumbs.db
 uploads/
 temp/
 tmp/
+
+# Local data storage
+data/

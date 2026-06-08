@@ -3,11 +3,13 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.document import Document
 from app.models.document_status import ProcessingStatus
+from app.models.user import User
 from app.schemas.document import DocumentCreate, DocumentResponse
 from app.services.document_processor import document_processor
 from app.services.audit_service import AuditService
 from app.ingestion.pdf_parser import PDFParserError
 from app.workers.compliance_worker import process_document_async
+from app.api.deps import get_current_user, get_current_active_auditor
 import hashlib
 import os
 from typing import Optional
@@ -23,12 +25,12 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB in bytes
 @router.post("/upload", status_code=status.HTTP_202_ACCEPTED)
 async def upload_document(
     file: UploadFile = File(...),
-    organization_id: str = Form(...),
-    uploaded_by: Optional[str] = Form(None),
+    current_user: User = Depends(get_current_active_auditor),
     db: Session = Depends(get_db)
 ):
     """
     Upload a document with security guardrails and duplicate detection.
+    Uses authenticated user's organization_id and user_id from JWT token.
     """
     try:
         # Security Guardrail 1: Validate file size
@@ -61,7 +63,7 @@ async def upload_document(
             # Scenario B: Duplicate Detected - Log audit before throwing exception
             AuditService.log_action(
                 db=db,
-                actor_id=uploaded_by or "anonymous",
+                actor_id=current_user.id,
                 action="DUPLICATE_DOCUMENT_DETECTED",
                 resource_type="document",
                 resource_id=sha256_hash,
@@ -69,7 +71,8 @@ async def upload_document(
                     "file_name": file.filename,
                     "file_size": file_size,
                     "mime_type": file.content_type,
-                    "existing_document_id": existing_document.id
+                    "existing_document_id": existing_document.id,
+                    "organization_id": current_user.organization_id
                 }
             )
             raise HTTPException(
@@ -89,9 +92,10 @@ async def upload_document(
             buffer.write(file_content)
         
         # Save Metadata: Create new document record with QUEUED status
+        # Use authenticated user's organization_id and user_id
         new_document = Document(
-            organization_id=organization_id,
-            uploaded_by=uploaded_by,
+            organization_id=current_user.organization_id,
+            uploaded_by=current_user.id,
             file_name=file.filename,
             original_file_name=file.filename,
             storage_path=file_path,
@@ -110,7 +114,7 @@ async def upload_document(
         # Scenario A: Success Upload - Log audit after successful commit
         AuditService.log_action(
             db=db,
-            actor_id=uploaded_by or "anonymous",
+            actor_id=current_user.id,
             action="UPLOAD_DOCUMENT",
             resource_type="document",
             resource_id=str(new_document.id),
@@ -119,7 +123,7 @@ async def upload_document(
                 "file_size": file_size,
                 "mime_type": file.content_type,
                 "sha256_hash": sha256_hash,
-                "organization_id": organization_id,
+                "organization_id": current_user.organization_id,
                 "storage_path": file_path,
                 "processing_status": "QUEUED"
             }
@@ -145,15 +149,40 @@ async def upload_document(
 
 
 @router.get("/{document_id}/status")
-async def get_document_status(document_id: str, db: Session = Depends(get_db)):
+async def get_document_status(
+    document_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """
     Get the current processing status of a document.
     
     This endpoint enables frontend polling to check document processing progress.
+    Users can only access documents from their own organization.
     """
     document = db.query(Document).filter(Document.id == document_id).first()
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
+    
+    # Tenant isolation: Ensure user can only access documents from their organization
+    if document.organization_id != current_user.organization_id:
+        AuditService.log_action(
+            db=db,
+            actor_id=current_user.id,
+            action="UNAUTHORIZED_DOCUMENT_ACCESS",
+            resource_type="document",
+            resource_id=document_id,
+            log_metadata={
+                "requested_document_id": document_id,
+                "document_organization_id": document.organization_id,
+                "user_organization_id": current_user.organization_id,
+                "user_email": current_user.email
+            }
+        )
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied. You can only access documents from your organization."
+        )
     
     return {
         "document_id": document.id,
