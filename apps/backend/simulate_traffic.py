@@ -1,12 +1,13 @@
 import requests
 import time
 import os
+import random
 from pathlib import Path
 
 # Configuration
-API_BASE_URL = "http://localhost:8000/api/v1"
+API_BASE_URL = "http://127.0.0.1:8000/api/v1"
 UPLOAD_URL = f"{API_BASE_URL}/documents/upload"
-METRICS_URL = "http://localhost:8000/metrics"
+METRICS_URL = "http://127.0.0.1:8000/metrics"
 
 # Test file path (create a dummy PDF file for testing)
 TEST_FILE_PATH = "test_document.pdf"
@@ -14,8 +15,32 @@ TEST_FILE_PATH = "test_document.pdf"
 
 def create_test_file():
     """Create a dummy test file for upload simulation."""
+    # Generate a minimal valid PDF format dynamically
+    timestamp = f"% Dynamic: {time.time()}-{random.randint(1000, 9999)}\n"
+    minimal_pdf_bytes = (
+        b"%PDF-1.4\n"
+        + timestamp.encode('utf-8')
+        + b"1 0 obj <</Type /Catalog /Pages 2 0 R>> endobj\n"
+        + b"2 0 obj <</Type /Pages /Kids [3 0 R] /Count 1>> endobj\n"
+        + b"3 0 obj <</Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R>> endobj\n"
+        + b"4 0 obj <</Length 48>> stream\n"
+        + b"BT /F1 24 Tf 100 700 Td (GovSwarm Live Traffic Audit Test) Tj ET\n"
+        + b"endstream\n"
+        + b"endobj\n"
+        + b"xref\n"
+        + b"0 5\n"
+        + b"0000000000 65535 f \n"
+        + b"0000000009 00000 n \n"
+        + b"0000000056 00000 n \n"
+        + b"0000000111 00000 n \n"
+        + b"0000000212 00000 n \n"
+        + b"trailer <</Size 5 /Root 1 0 R>>\n"
+        + b"startxref\n"
+        + b"311\n"
+        + b"%%EOF"
+    )
     with open(TEST_FILE_PATH, "wb") as f:
-        f.write(b"%PDF-1.4\n%Mock PDF file for testing\n")
+        f.write(minimal_pdf_bytes)
 
 
 def simulate_upload():
@@ -31,8 +56,8 @@ def simulate_upload():
         "file": (TEST_FILE_PATH, open(TEST_FILE_PATH, "rb"), "application/pdf")
     }
     data = {
-        "organization_id": "test-org-123",
-        "uploaded_by": "simulation-script"
+        "organization_id": "11111111-1111-1111-1111-111111111111",
+        "uploaded_by": "22222222-2222-2222-2222-222222222222"
     }
     
     try:

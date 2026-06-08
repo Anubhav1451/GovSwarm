@@ -11,7 +11,7 @@ class AuditService:
         action: str,
         resource_type: str,
         resource_id: str,
-        metadata: dict = None
+        log_metadata: dict = None
     ):
         """
         Log an audit action with resilient error handling.
@@ -22,7 +22,7 @@ class AuditService:
             action: Action being performed
             resource_type: Type of resource being acted upon
             resource_id: ID of the resource
-            metadata: Additional metadata to store
+            log_metadata: Additional metadata to store
         """
         try:
             audit_log = AuditLog(
@@ -30,7 +30,7 @@ class AuditService:
                 action=action,
                 resource_type=resource_type,
                 resource_id=resource_id,
-                metadata=metadata or {}
+                log_metadata=log_metadata or {}
             )
             db.add(audit_log)
             db.commit()

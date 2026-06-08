@@ -8,7 +8,7 @@ class VerificationService:
     """Service for verifying identifiers against government registries"""
     
     @staticmethod
-    async def verify_and_persist_identifiers(db: Session, document_id: int, entities: dict):
+    async def verify_and_persist_identifiers(db: Session, document_id: str, entities: dict):
         """
         Verify extracted identifiers against government registries and persist results.
         
@@ -39,7 +39,7 @@ class VerificationService:
                 action="EXTERNAL_REGISTRY_VERIFIED",
                 resource_type="verification_result",
                 resource_id=str(verification_record.id),
-                metadata={
+                log_metadata={
                     "identifier": verification_result.identifier,
                     "verification_type": verification_result.verification_type,
                     "found": verification_result.found,
@@ -67,7 +67,7 @@ class VerificationService:
                 action="EXTERNAL_REGISTRY_VERIFIED",
                 resource_type="verification_result",
                 resource_id=str(verification_record.id),
-                metadata={
+                log_metadata={
                     "identifier": verification_result.identifier,
                     "verification_type": verification_result.verification_type,
                     "found": verification_result.found,
@@ -95,7 +95,7 @@ class VerificationService:
                 action="EXTERNAL_REGISTRY_VERIFIED",
                 resource_type="verification_result",
                 resource_id=str(verification_record.id),
-                metadata={
+                log_metadata={
                     "identifier": verification_result.identifier,
                     "verification_type": verification_result.verification_type,
                     "found": verification_result.found,

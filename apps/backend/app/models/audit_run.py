@@ -11,5 +11,5 @@ class AuditRun(Base):
     passed_checks = Column(Integer, default=0)
     failed_checks = Column(Integer, default=0)
     total_checks = Column(Integer, default=0)
-    metadata = Column(JSON, default={})
+    run_metadata = Column(JSON, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now())

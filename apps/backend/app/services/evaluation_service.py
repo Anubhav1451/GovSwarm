@@ -50,7 +50,7 @@ class EvaluationService:
             action="DOCUMENT_AUDIT_COMPLETED",
             resource_type="document",
             resource_id=str(document_id),
-            metadata={
+            log_metadata={
                 "risk_score": risk_result["risk_score"],
                 "risk_rating": risk_result["risk_rating"],
                 "total_findings": len(risk_result["findings"]),

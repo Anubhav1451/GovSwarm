@@ -59,7 +59,7 @@ async def reprocess_dead_letter_job(
         action="DLQ_REPROCESS_TRIGGERED",
         resource_type="dead_letter_job",
         resource_id=str(dlq_job.id),
-        metadata={
+        log_metadata={
             "dlq_job_id": dlq_job.id,
             "document_id": document.id,
             "task_name": dlq_job.task_name,
@@ -120,7 +120,7 @@ async def get_sla_breaches(
             action="SLA_BREACH_ALERT_DETECTED",
             resource_type="system",
             resource_id="",
-            metadata={
+            log_metadata={
                 "total_violations": len(violations),
                 "queue_delay_count": len([v for v in violations if v["violation_type"] == "QUEUE_DELAY"]),
                 "processing_delay_count": len([v for v in violations if v["violation_type"] == "PROCESSING_DELAY"]),

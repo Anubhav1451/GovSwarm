@@ -17,9 +17,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/govswarm
       - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://postgres.lmtxruivxlhvxrilruiv:Anubhav8789@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres?sslmode=require
     env_file:
       - ./apps/backend/.env
     depends_on:
@@ -33,9 +36,12 @@ services:
     build:
       context: ./apps/backend
       dockerfile: Dockerfile
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/govswarm
       - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://postgres.lmtxruivxlhvxrilruiv:Anubhav8789@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres?sslmode=require
     env_file:
       - ./apps/backend/.env
     depends_on:

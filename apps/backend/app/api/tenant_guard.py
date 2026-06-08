@@ -81,7 +81,7 @@ class TenantGuard:
                     action="SECURITY_VIOLATION_BREACH",
                     resource_type=self.resource_type,
                     resource_id=resource_id,
-                    metadata={
+                    log_metadata={
                         "breach_type": "tenant_isolation_violation",
                         "user_organization_id": str(current_user.organization_id),
                         "target_organization_id": str(target_org_id),

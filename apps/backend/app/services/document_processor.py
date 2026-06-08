@@ -19,7 +19,7 @@ class DocumentProcessor:
         self.pdf_parser = PDFParser()
         self.entity_extractor = EntityExtractor()
     
-    def process_document(self, db: Session, document_id: int, file_path: str) -> Document:
+    def process_document(self, db: Session, document_id: str, file_path: str) -> Document:
         """
         Orchestrate the complete document processing cycle.
         
@@ -61,7 +61,7 @@ class DocumentProcessor:
                     action="LLM_FALLBACK_TRIGGERED",
                     resource_type="document",
                     resource_id=str(document.id),
-                    metadata={
+                    log_metadata={
                         "original_document_type": classification_result.document_type,
                         "original_confidence": classification_result.confidence,
                         "reason": "Rule-based classification confidence below threshold"
@@ -123,7 +123,7 @@ class DocumentProcessor:
                 action="DOCUMENT_CLASSIFIED",
                 resource_type="document",
                 resource_id=str(document.id),
-                metadata={
+                log_metadata={
                     "document_type": classification_result.document_type,
                     "confidence": classification_result.confidence,
                     "matched_rules": classification_result.matched_rules
@@ -137,7 +137,7 @@ class DocumentProcessor:
                 action="PARSE_DOCUMENT_SUCCESS",
                 resource_type="document",
                 resource_id=str(document.id),
-                metadata={
+                log_metadata={
                     "page_count": document.page_count,
                     "gstins_count": len(extraction_result.gstins),
                     "pans_count": len(extraction_result.pans),
@@ -167,7 +167,7 @@ class DocumentProcessor:
                 action="PARSE_DOCUMENT_FAILED",
                 resource_type="document",
                 resource_id=str(document.id),
-                metadata={
+                log_metadata={
                     "error_message": str(e),
                     "file_path": file_path
                 }
@@ -187,7 +187,7 @@ class DocumentProcessor:
                     action="PARSE_DOCUMENT_FAILED",
                     resource_type="document",
                     resource_id=str(document.id),
-                    metadata={
+                    log_metadata={
                         "error_message": str(e),
                         "file_path": file_path
                     }

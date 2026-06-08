@@ -45,10 +45,7 @@ class ComplianceTask(Task):
         # Parse document_id from first argument
         document_id = None
         if args and len(args) > 0:
-            try:
-                document_id = int(args[0])
-            except (ValueError, TypeError):
-                document_id = None
+            document_id = args[0]
         
         # Determine DLQ reason
         if isinstance(exc, MaxRetriesExceededError):
@@ -73,7 +70,7 @@ class ComplianceTask(Task):
                 action="TASK_FAILURE",
                 resource_type="document",
                 resource_id=str(document_id) if document_id else task_id,
-                metadata={
+                log_metadata={
                     "task_name": self.name,
                     "task_id": task_id,
                     "dlq_reason": dlq_reason,
@@ -135,7 +132,7 @@ def process_document_async(self, document_id: str):
     db = SessionLocal()
     try:
         # Fetch the document
-        document = db.query(Document).filter(Document.id == int(document_id)).first()
+        document = db.query(Document).filter(Document.id == document_id).first()
         if not document:
             raise ValueError(f"Document with ID {document_id} not found")
         
@@ -180,7 +177,7 @@ def process_document_async(self, document_id: str):
                     action="DOCUMENT_PROCESSING_COMPLETED",
                     resource_type="document",
                     resource_id=str(document.id),
-                    metadata={
+                    log_metadata={
                         "document_id": document.id,
                         "file_name": document.file_name,
                         "organization_id": document.organization_id,
@@ -210,7 +207,7 @@ def process_document_async(self, document_id: str):
                     action="DOCUMENT_PROCESSING_COMPLETED",
                     resource_type="document",
                     resource_id=str(document.id),
-                    metadata={
+                    log_metadata={
                         "document_id": document.id,
                         "file_name": document.file_name,
                         "organization_id": document.organization_id,
@@ -240,7 +237,7 @@ def process_document_async(self, document_id: str):
                 action="DOCUMENT_PROCESSING_FAILED",
                 resource_type="document",
                 resource_id=str(document.id),
-                metadata={
+                log_metadata={
                     "document_id": document.id,
                     "file_name": document.file_name,
                     "organization_id": document.organization_id,
@@ -269,7 +266,7 @@ def process_document_async(self, document_id: str):
                 action="DOCUMENT_PROCESSING_FAILED",
                 resource_type="document",
                 resource_id=str(document.id),
-                metadata={
+                log_metadata={
                     "document_id": document.id,
                     "file_name": document.file_name,
                     "organization_id": document.organization_id,
@@ -304,7 +301,7 @@ def process_document_async(self, document_id: str):
                     action="DOCUMENT_PROCESSING_FAILED",
                     resource_type="document",
                     resource_id=str(document.id),
-                    metadata={
+                    log_metadata={
                         "document_id": document.id,
                         "file_name": document.file_name if document else "unknown",
                         "organization_id": document.organization_id if document else "unknown",

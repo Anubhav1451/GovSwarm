@@ -3,6 +3,7 @@ from sqlalchemy.sql import func
 from app.db.session import Base
 from app.models.document_status import ProcessingStatus
 import enum
+import uuid
 
 class UploadStatus(str, enum.Enum):
     UPLOADED = "uploaded"
@@ -11,7 +12,7 @@ class UploadStatus(str, enum.Enum):
 class Document(Base):
     __tablename__ = "documents"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     organization_id = Column(String, index=True)
     uploaded_by = Column(String)
     file_name = Column(String)

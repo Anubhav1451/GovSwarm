@@ -65,7 +65,7 @@ async def upload_document(
                 action="DUPLICATE_DOCUMENT_DETECTED",
                 resource_type="document",
                 resource_id=sha256_hash,
-                metadata={
+                log_metadata={
                     "file_name": file.filename,
                     "file_size": file_size,
                     "mime_type": file.content_type,
@@ -114,7 +114,7 @@ async def upload_document(
             action="UPLOAD_DOCUMENT",
             resource_type="document",
             resource_id=str(new_document.id),
-            metadata={
+            log_metadata={
                 "file_name": file.filename,
                 "file_size": file_size,
                 "mime_type": file.content_type,
@@ -145,7 +145,7 @@ async def upload_document(
 
 
 @router.get("/{document_id}/status")
-async def get_document_status(document_id: int, db: Session = Depends(get_db)):
+async def get_document_status(document_id: str, db: Session = Depends(get_db)):
     """
     Get the current processing status of a document.
     
