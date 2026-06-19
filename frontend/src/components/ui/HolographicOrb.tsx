@@ -82,6 +82,18 @@ const HolographicOrb: React.FC<HolographicOrbProps> = ({ vendor, metrics }) => {
             metalness: 0.8,
           }}
         />
+        {/* Central holographic core */}
+        <mesh>
+          <sphereGeometry args={[1.2, 32, 32]} />
+          <meshStandardMaterial
+            color={orbColor}
+            emissive={orbColor}
+            emissiveIntensity={pulse * 0.5}
+            wireframe={true}
+            transparent
+            opacity={0.4}
+          />
+        </mesh>
       </>
     );
   };

@@ -913,18 +913,18 @@ export default function App() {
                   style={{
                     width: '100%',
                     padding: '8px',
-                    background: 'none',
+                    background: '#FFFFFF',
                     border: '1px solid rgba(0,229,255,0.3)',
                     borderRadius: '4px',
-                    color: '#000000',
+                    color: '#1A202C',
                     fontFamily: 'monospace',
                     fontSize: '13px'
                   }}
                 >
-                  <option value="" style={{ color: '#000000' }}>Select status</option>
-                  <option value="Compliant" style={{ color: '#000000' }}>Compliant</option>
-                  <option value="Non-Compliant" style={{ color: '#000000' }}>Non-Compliant</option>
-                  <option value="Under Review" style={{ color: '#000000' }}>Under Review</option>
+                  <option value="" style={{ color: '#1A202C' }}>Select status</option>
+                  <option value="Compliant" style={{ color: '#1A202C' }}>Compliant</option>
+                  <option value="Non-Compliant" style={{ color: '#1A202C' }}>Non-Compliant</option>
+                  <option value="Under Review" style={{ color: '#1A202C' }}>Under Review</option>
                 </select>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
