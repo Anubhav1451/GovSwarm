@@ -235,6 +235,27 @@ export default function App() {
     }
   }, [logs]);
 
+  // Dynamic telemetry engine (simulated live updates)
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      // Add a random log entry
+      const randomLog = `📡 [TELEMETRY] -> Random packet ${Math.floor(Math.random() * 1000)} received at ${new Date().toLocaleTimeString()}`;
+      setLogs(prev => {
+        const newLogs = [...prev, randomLog];
+        if (newLogs.length > 500) newLogs = newLogs.slice(-500);
+        return newLogs;
+      });
+      // Slightly vary riskScore for realism
+      setMetrics(prev => {
+        if (!prev || prev.riskScore === undefined) return prev;
+        const change = (Math.random() - 0.5) * 2; // -1 to 1
+        const newScore = Math.max(0, Math.min(100, prev.riskScore + change));
+        return { ...prev, riskScore: newScore };
+      });
+    }, 3500);
+    return () => clearInterval(intervalId);
+  }, []); // run once on mount
+
   // Show critical toast when riskScore > 70
   useEffect(() => {
     if (metrics.riskScore !== undefined && metrics.riskScore !== null && metrics.riskScore > 70) {
@@ -895,15 +916,15 @@ export default function App() {
                     background: 'none',
                     border: '1px solid rgba(0,229,255,0.3)',
                     borderRadius: '4px',
-                    color: '#F8FAFC',
+                    color: '#000000',
                     fontFamily: 'monospace',
                     fontSize: '13px'
                   }}
                 >
-                  <option value="">Select status</option>
-                  <option value="Compliant">Compliant</option>
-                  <option value="Non-Compliant">Non-Compliant</option>
-                  <option value="Under Review">Under Review</option>
+                  <option value="" style={{ color: '#000000' }}>Select status</option>
+                  <option value="Compliant" style={{ color: '#000000' }}>Compliant</option>
+                  <option value="Non-Compliant" style={{ color: '#000000' }}>Non-Compliant</option>
+                  <option value="Under Review" style={{ color: '#000000' }}>Under Review</option>
                 </select>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>
