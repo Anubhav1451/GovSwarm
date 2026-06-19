@@ -146,6 +146,17 @@ export default function App() {
 
     let nodes, alerts, shield, pending, riskScore, riskLabel, riskColor, mcaStatus, gstStatus, panStatus, escalationText;
 
+    // Mock IDs for GSTIN and PAN
+    const mockGST = isMatrix ? "27AABCU9603R1Z5"
+      : isApex ? "29AABCU9603R2Z6"
+      : isSecureLogix ? "30AABCU9603R3Z7"
+      : "27AABCU9603R1Z5"; // Vardhaman default
+
+    const mockPAN = isMatrix ? "AABCU9603R"
+      : isApex ? "AABCU9603R2"
+      : isSecureLogix ? "AABCU9603R3"
+      : "AABCU9603R1";
+
     if (isMatrix) {
       nodes = "8,912";
       alerts = 412;
@@ -155,8 +166,8 @@ export default function App() {
       riskLabel = "CRITICAL THREAT";
       riskColor = "#EF4444";
       mcaStatus = "🚨 MCA ROSTER: FICTITIOUS DIRECTORS";
-      gstStatus = "SUSPENDED (❌)";
-      panStatus = "FAILED RE-VERIFICATION (❌)";
+      gstStatus = `${mockGST} SUSPENDED (❌)`;
+      panStatus = `${mockPAN} FAILED RE-VERIFICATION (❌)`;
       escalationText = "IMMEDIATE ASSET FREEZE: Intelligence indicates laundering loops.";
     } else if (isApex) {
       nodes = "14,102";
@@ -167,8 +178,8 @@ export default function App() {
       riskLabel = "OPTIMAL SECURITY";
       riskColor = "#22C55E";
       mcaStatus = "✅ MCA ROSTER: CLEARANCE";
-      gstStatus = "ACTIVE (✓)";
-      panStatus = "VERIFIED (✓)";
+      gstStatus = `${mockGST} ACTIVE (✓)`;
+      panStatus = `${mockPAN} VERIFIED (✓)`;
       escalationText = "Continuous baseline polling recommended status tracker.";
     } else if (isSecureLogix) {
       nodes = "15000";
@@ -179,8 +190,8 @@ export default function App() {
       riskLabel = "OPTIMAL SECURITY";
       riskColor = "#22C55E";
       mcaStatus = "✅ MCA ROSTER: CLEARANCE";
-      gstStatus = "ACTIVE (✓)";
-      panStatus = "VERIFIED (✓)";
+      gstStatus = `${mockGST} ACTIVE (✓)`;
+      panStatus = `${mockPAN} VERIFIED (✓)`;
       escalationText = "Continuous baseline polling recommended status tracker.";
     } else {
       // Default to Vardhaman Infra Solutions
@@ -192,8 +203,8 @@ export default function App() {
       riskLabel = "ELEVATED THREAT";
       riskColor = "#EF4444";
       mcaStatus = "⚠️ MCA ROSTER: IDENTITY BREACH";
-      gstStatus = "ACTIVE (✓)";
-      panStatus = "VERIFIED (✓)";
+      gstStatus = `${mockGST} ACTIVE (✓)`;
+      panStatus = `${mockPAN} VERIFIED (✓)`;
       escalationText = "Continuous baseline polling recommended status tracker.";
     }
 
