@@ -82,6 +82,10 @@ export default function App() {
   const [escalationMandateTiltY, setEscalationMandateTiltY] = useState(0);
   const [documentVaultTiltX, setDocumentVaultTiltX] = useState(0);
   const [documentVaultTiltY, setDocumentVaultTiltY] = useState(0);
+  const [matrixTiltX, setMatrixTiltX] = useState(0);
+  const [matrixTiltY, setMatrixTiltY] = useState(0);
+  const [logsTiltX, setLogsTiltX] = useState(0);
+  const [logsTiltY, setLogsTiltY] = useState(0);
   // Add Organization Modal state
   const [showAddOrgModal, setShowAddOrgModal] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
