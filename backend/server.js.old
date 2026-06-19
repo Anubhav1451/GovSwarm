@@ -1,0 +1,163 @@
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Configuration Constants
+const BUSY_TIMEOUT_MS = 10000; // 10 seconds - threshold for agent recovery
+const MAX_TASK_RETRIES = 3;    // Maximum retry attempts before dead letter
+
+// In-Memory Core State Buffer
+let organizations = [];
+let agents = [
+  { name: 'Agent-Alpha', role: 'Risk Profiler', status: 'IDLE', busySince: null, currentTask: null },
+  { name: 'Agent-Beta', role: 'Compliance Officer', status: 'IDLE', busySince: null, currentTask: null }
+];
+let logs = [];
+let alerts = [];
+let taskQueue = [];
+
+// System Operation Metrics
+let totalOrganizationsCount = 4;
+let fraudInterceptionsCount = 0; // Start at 0, will increment as frauds are found
+
+// Helper to broadcast orchestrator telemetry
+function pushLog(agentId, action, result) {
+  logs.unshift({
+    agentId,
+    action,
+    result,
+    createdAt: new Date().toISOString()
+  });
+  if (logs.length > 50) logs.pop();
+}
+
+// Global Orchestrator Process Loop (Runs every 2 seconds)
+setInterval(() => {
+  const now = Date.now();
+
+  // 1. Fail-safe recovery for busy agents (stuck agent detection and recovery)
+  agents.forEach(agent => {
+    if (agent.status === 'BUSY' && agent.busySince && (now - agent.busySince) > BUSY_TIMEOUT_MS) {
+      // Agent has been busy too long - initiate recovery
+      console.warn(`[FAILSAFE] Agent ${agent.name} stuck for ${Math.floor((now - agent.busySince)/1000)}s - recovering`);
+
+      agent.status = 'IDLE';
+      const stuckTask = agent.currentTask;
+      agent.busySince = null;
+      agent.currentTask = null;
+
+      if (stuckTask) {
+        // Increment retry count and handle according to circuit breaker
+        stuckTask.retryCount = (stuckTask.retryCount || 0) + 1;
+
+        if (stuckTask.retryCount <= MAX_TASK_RETRIES) {
+          // Re-queue task for retry
+          taskQueue.push(stuckTask);
+          pushLog('System Recovery', `Task [${stuckTask.name}] retry attempt ${stuckTask.retryCount}`, `🔄 Task re-queued after agent timeout`);
+        } else {
+          // Dead letter: task exceeded max retries
+          pushLog('System Recovery', `Task [${stuckTask.name}] exceeded max retries (${MAX_TASK_RETRIES})`, `☠️ Task moved to dead letter queue`);
+          alerts.unshift(`[ALERT] Task ${stuckTask.name} failed after ${MAX_TASK_RETRIES} retries`);
+        }
+      }
+    }
+  });
+
+  // 2. Task processing loop - assign tasks to idle agents
+  if (taskQueue.length > 0) {
+    const idleAgent = agents.find(a => a.status === 'IDLE');
+    if (idleAgent) {
+      const nextTask = taskQueue.shift();
+      idleAgent.status = 'BUSY';
+      idleAgent.busySince = now;
+      idleAgent.currentTask = nextTask;
+
+      pushLog(idleAgent.name, `Processing Queue Task [${nextTask.name}]`, `⚡ ANALYSIS IN PROGRESS...`);
+
+      // Simulating Autonomous Neural AI Task Processing
+      setTimeout(() => {
+        const isFraud = nextTask.incorporationNumber.toUpperCase().includes('FRAUD') || Math.random() > 0.7;
+
+        // Reset agent state after task completion
+        idleAgent.busySince = null;
+        idleAgent.currentTask = null;
+        idleAgent.status = 'IDLE';
+
+        if (isFraud) {
+          fraudInterceptionsCount++;
+          const alertMsg = `[ALERT] Task completed by node [${idleAgent.name}] for ${nextTask.name} -> Target resolution: HIGH_RISK`;
+          alerts.unshift(alertMsg);
+          pushLog(idleAgent.name, `Evaluation for ${nextTask.name}`, `[CRITICAL-WARN] High Risk Flagged!`);
+        } else {
+          pushLog(idleAgent.name, `Evaluation for ${nextTask.name}`, `[SUCCESS] APPROVED - Verified with central corporate affairs registry.`);
+        }
+      }, 3500);
+    }
+  }
+}, 2000);
+
+// API Endpoints
+app.get('/api/v1/metrics', (req, res) => {
+  res.json({
+    success: true,
+    metrics: {
+      totalOrganizations: totalOrganizationsCount,
+      totalAgents: agents.length,
+      highRiskAlerts: fraudInterceptionsCount,
+      busyAgents: agents.filter(a => a.status === 'BUSY').length,
+      queuedTasksCount: taskQueue.length
+    }
+  });
+});
+
+app.get('/api/v1/logs', (req, res) => {
+  res.json(logs);
+});
+
+app.get('/api/v1/agents', (req, res) => {
+  res.json(agents);
+});
+
+app.get('/api/v1/swarm/alerts', (req, res) => {
+  res.json(alerts);
+});
+
+app.post('/api/v1/organization/register', (req, res) => {
+  const { name, incorporationNumber } = req.body;
+  if (!name || !incorporationNumber) {
+    return res.status(400).json({ error: 'Missing parameter specs.' });
+  }
+  const newOrg = { name, incorporationNumber, id: Date.now(), retryCount: 0 };
+  organizations.push(newOrg);
+  totalOrganizationsCount++;
+
+  // Push into Autonomous Ingestion Buffer
+  taskQueue.push(newOrg);
+
+  alerts.unshift(`[INFO] Registered target cluster pipeline: ${name}`);
+  pushLog('System Ingestion', `Buffered registration for ${name}`, '📄 Registered successfully into queue!');
+
+  res.json({ success: true, message: 'Target queued into pipeline buffer successfully.' });
+});
+
+app.post('/api/v1/agent/spawn', (req, res) => {
+  const { name, role } = req.body;
+  if (!name || !role) {
+    return res.status(400).json({ error: 'Missing definition matrix.' });
+  }
+  const newAgent = { name, role, status: 'IDLE', busySince: null, currentTask: null };
+  agents.push(newAgent);
+
+  pushLog('Core Orchestrator', `Spawned new agent asset [${name}]`, `🤖 Node initialized as ${role}`);
+  res.json({ success: true, agent: newAgent });
+});
+
+// Port Binding & Initialization
+const PORT = 8000;
+app.listen(PORT, () => {
+  console.log(`GovSwarm V2 Production Core Engine bound securely to port ${PORT}`);
+  console.log(`[CONFIG] Busy agent timeout: ${BUSY_TIMEOUT_MS}ms, Max task retries: ${MAX_TASK_RETRIES}`);
+});

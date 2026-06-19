@@ -1,0 +1,29 @@
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #050816;
+  color: #F8FAFC;
+  font-family: 'Courier New', Courier, monospace, system-ui;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+/* Custom glowing scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050816;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00E5FF;
+}

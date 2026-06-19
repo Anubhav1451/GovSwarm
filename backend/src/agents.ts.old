@@ -1,0 +1,32 @@
+import { Router } from 'express';
+import { PrismaClient } from './generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+
+const router = Router();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: "postgresql://postgres:Anubhav8789@localhost:5432/govswarm_db?schema=public" })
+});
+
+// GET /api/v1/agents
+router.get('/', async (req, res) => {
+  try {
+    const agents = await prisma.agent.findMany().catch(() => []);
+    res.json(agents || []);
+  } catch (err) {
+    res.json([]);
+  }
+});
+
+// POST /api/v1/agent/spawn (or /spawn relative to /api/v1/agent)
+router.post('/spawn', async (req, res) => {
+  try {
+    const { name, role } = req.body;
+    if (!name || !role) return res.status(400).json({ success: false, error: "Missing metadata" });
+    const agent = await prisma.agent.create({ data: { name, role, status: 'IDLE' } });
+    res.json({ success: true, agent });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to assemble agent unit" });
+  }
+});
+
+export default router;

@@ -1,0 +1,148 @@
+/* GovSwarm Intelligence Command Center - Global Styles */
+:root {
+  --background-dark: #050816;
+  --surface-dark: #0F172A;
+  --accent-cyan: #00E5FF;
+  --success-green: #22C55E;
+  --warning-amber: #F59E0B;
+  --critical-red: #EF4444;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --border-glass: rgba(255, 255, 255, 0.05);
+  --glass-background: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(0, 229, 255, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: var(--background-dark);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism effect */
+.glass-panel {
+  background: var(--glass-background);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Accent glow */
+.accent-glow {
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pulse-animation {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Number count-up animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.count-up-animation {
+  animation: countUp 1s ease-out forwards;
+}
+
+.data-packet {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--accent-cyan);
+  border-radius: 50%;
+  animation: packetMove 3s linear infinite;
+}
+
+@keyframes packetMove {
+  0% { transform: translate(0, 0) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(100px, 50px) scale(1.5); opacity: 0; }
+}
+
+/* Terminal cursor blink */
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.terminal-cursor {
+  animation: cursorBlink 1s ease-in-out infinite;
+}
+
+/* Orb breathing effect */
+@keyframes orbBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.orb-breath {
+  animation: orbBreath 4s ease-in-out infinite;
+}
+
+/* Responsive layout */
+.command-center-main {
+  display: flex;
+  height: calc(100vh - 120px); /* Account for header */
+  gap: 24px;
+  padding: 24px;
+}
+
+.left-panel {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+
+.center-panel {
+  flex: 0 0 50%;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.right-panel {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+
+/* Hide scrollbars but allow scrolling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.5);
+}

@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id                 String   @id @default(uuid())
+  name               String
+  incorporationNumber String   @unique
+  createdAt          DateTime @default(now())
+  status             String   @default("PENDING") // Can be PENDING, APPROVED, or HIGH_RISK
+}
+
+model Agent {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  status    String   @default("IDLE") // IDLE, BUSY, OFFLINE
+  createdAt DateTime @default(now())
+}
+
+model TaskLog {
+  id        String   @id @default(uuid())
+  agentName String
+  orgName   String
+  action    String   // e.g., "Verifying Incorporation Number"
+  result    String   // e.g., "PASSED - Valid active company data found"
+  timestamp DateTime @default(now())
+}
