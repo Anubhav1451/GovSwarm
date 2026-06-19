@@ -1,7 +1,7 @@
 import React from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Sphere } from '@react-three/drei';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 
 interface HolographicOrbProps {
   vendor: string;
@@ -50,45 +50,45 @@ const HolographicOrb: React.FC<HolographicOrbProps> = ({ vendor, metrics }) => {
   }, [riskScore]);
   const rotationSpeed = baseSpeed * speedMultiplier;
 
-  // Ref for the sphere to update material
-  const sphereRef = React.useRef<any>(null);
+  const OrbContent = ({ orbColor, pulse, rotationSpeed }: { orbColor: string; pulse: number; rotationSpeed: number }) => {
+    const sphereRef = useRef<any>(null);
+    useFrame((state, delta) => {
+      if (sphereRef.current) {
+        // Rotate the sphere
+        sphereRef.current.rotation.x += rotationSpeed * delta;
+        sphereRef.current.rotation.y += rotationSpeed * delta;
+        sphereRef.current.rotation.z += rotationSpeed * delta * 0.5;
 
-  useFrame((state, delta) => {
-    if (sphereRef.current) {
-      // Rotate the sphere
-      sphereRef.current.rotation.x += rotationSpeed * delta;
-      sphereRef.current.rotation.y += rotationSpeed * delta;
-      sphereRef.current.rotation.z += rotationSpeed * delta * 0.5;
-
-      // Update material properties for pulse
-      if (sphereRef.current.material) {
-        sphereRef.current.material.emissiveIntensity = pulse * 0.5;
-        sphereRef.current.material.needsUpdate = true;
+        // Update material properties for pulse
+        if (sphereRef.current.material) {
+          sphereRef.current.material.emissiveIntensity = pulse * 0.5;
+          sphereRef.current.material.needsUpdate = true;
+        }
       }
-    }
-  });
+    });
+
+    return (
+      <>
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} intensity={0.5} />
+        <Sphere
+          ref={sphereRef}
+          args={[1, 32, 32]}
+          material={{
+            color: orbColor,
+            emissive: orbColor,
+            emissiveIntensity: pulse * 0.5,
+            roughness: 0.2,
+            metalness: 0.8,
+          }}
+        />
+      </>
+    );
+  };
 
   return (
     <Canvas style={{ height: '100%', width: '100%' }} camera={{ position: [0, 0, 5] }}>
-      {/* Ambient light to make the emissive visible */}
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={0.5} />
-      <Sphere
-        ref={sphereRef}
-        args={[1, 32, 32]}
-        material={{
-          color: orbColor,
-          emissive: orbColor,
-          emissiveIntensity: pulse * 0.5,
-          roughness: 0.2,
-          metalness: 0.8,
-          // Add a slight glow effect
-          // Note: three.js doesn't have a direct glow, we can use emissive and bloom in postprocessing,
-          // but for simplicity we rely on emissive.
-        }}
-      />
-      {/* Optional: add a ring or particles for extra effect */}
-      {/* For now, we keep it simple */}
+      <OrbContent orbColor={orbColor} pulse={pulse} rotationSpeed={rotationSpeed} />
     </Canvas>
   );
 };
