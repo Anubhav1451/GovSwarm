@@ -87,7 +87,7 @@ const HolographicOrb: React.FC<HolographicOrbProps> = ({ vendor, metrics }) => {
   };
 
   return (
-    <Canvas style={{ height: '100%', width: '100%' }} camera={{ position: [0, 0, 5] }}>
+    <Canvas style={{ height: '200px', width: '100%' }} camera={{ position: [0, 0, 5] }}>
       <OrbContent orbColor={orbColor} pulse={pulse} rotationSpeed={rotationSpeed} />
     </Canvas>
   );
