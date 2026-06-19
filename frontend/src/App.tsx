@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShieldAlert, Search, Bell, Cpu, AlertTriangle, Activity, Download, Terminal, Network, Shield, Mic, Upload } from 'lucide-react';
 import SwarmGraph from './features/investigations/SwarmGraph';
+import HolographicOrb from './components/ui/HolographicOrb';
 
 const AnimationStyles = () => (
   <style>{`
@@ -71,6 +72,16 @@ export default function App() {
   const [complianceMask, setComplianceMask] = useState(false);
   // Critical alert toast state
   const [showCriticalToast, setShowCriticalToast] = useState(false);
+  const [opHubHeaderTiltX, setOpHubHeaderTiltX] = useState(0);
+  const [opHubHeaderTiltY, setOpHubHeaderTiltY] = useState(0);
+  const [targetCaseTiltX, setTargetCaseTiltX] = useState(0);
+  const [targetCaseTiltY, setTargetCaseTiltY] = useState(0);
+  const [threatScoreTiltX, setThreatScoreTiltX] = useState(0);
+  const [threatScoreTiltY, setThreatScoreTiltY] = useState(0);
+  const [escalationMandateTiltX, setEscalationMandateTiltX] = useState(0);
+  const [escalationMandateTiltY, setEscalationMandateTiltY] = useState(0);
+  const [documentVaultTiltX, setDocumentVaultTiltX] = useState(0);
+  const [documentVaultTiltY, setDocumentVaultTiltY] = useState(0);
   // Add Organization Modal state
   const [showAddOrgModal, setShowAddOrgModal] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
@@ -368,7 +379,7 @@ export default function App() {
             <select
               value={selectedVendorName}
               onChange={(e) => setSelectedVendorName(e.target.value)}
-              style={{ background: 'none', border: 'none', color: '#FFF', fontSize: '12px', outline: 'none', width: '240px', fontFamily: 'monospace', cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', color: '#FFF', fontSize: '12px', outline: 'none', width: '240px', fontFamily: 'monospace', cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
             >
               <option value="Vardhaman Infra Solutions" style={{ background: '#0F172A' }}>Vardhaman Infra Solutions</option>
               <option value="Apex Cyber Defense" style={{ background: '#0F172A' }}>Apex Cyber Defense</option>
@@ -384,7 +395,7 @@ export default function App() {
                     setIsListening(true);
                   }
                 }}
-                style={{ cursor: 'pointer', padding: '4px', background: 'rgba(0,229,255,0.1)', borderRadius: '50%' }}
+                style={{ cursor: 'pointer', padding: '4px', background: 'rgba(0,229,255,0.1)', borderRadius: '50%', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
               />
             )}
             {isListening && (
@@ -397,7 +408,7 @@ export default function App() {
                     setIsListening(false);
                   }
                 }}
-                style={{ cursor: 'pointer', padding: '4px', background: 'rgba(239,68,68,0.1)', borderRadius: '50%' }}
+                style={{ cursor: 'pointer', padding: '4px', background: 'rgba(239,68,68,0.1)', borderRadius: '50%', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
               />
             )}
           </div>
@@ -413,7 +424,8 @@ export default function App() {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '2px'
+              gap: '2px',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             <Shield size={16} color="#00E5FF" /> ADD ORG
@@ -429,7 +441,32 @@ export default function App() {
       {/* LEFT COLUMN: LIVE RUNTIME STATISTICS */}
       <div style={{ display: 'flex', height: '100%' }}>
         <div style={{ flex: '1 1 360px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div style={{ background: '#0F172A', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '16px' }}>
+          <div
+            style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              boxShadow: '0 0 20px rgba(0,229,255,0.15), 0 0 40px rgba(0,229,255,0.1)',
+              borderRadius: '16px',
+              padding: '16px',
+              transform: `rotateX(${matrixTiltY}deg) rotateY(${matrixTiltX}deg)`,
+              transition: 'transform 0.2s ease'
+            }}
+            onMouseMove={(e) => {
+              const { clientX, clientY } = e;
+              const { width, height, left, top } = e.currentTarget.getBoundingClientRect();
+              const x = clientX - (left + width / 2);
+              const y = clientY - (top + height / 2);
+              const tiltX = (y / (height / 2)) * 5; // max 5 degrees
+              const tiltY = (x / (width / 2)) * 5;
+              setMatrixTiltX(tiltX);
+              setMatrixTiltY(tiltY);
+            }}
+            onMouseLeave={() => {
+              setMatrixTiltX(0);
+              setMatrixTiltY(0);
+            }}
+          >
             <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '12px' }}>// GLOBAL TELEMETRY MATRIX (API SYNCED)</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%' }}>
               <div style={{ background: '#050816', border: '1px solid rgba(255,255,255,0.02)', borderRadius: '8px', padding: '12px' }}>
@@ -456,16 +493,41 @@ export default function App() {
           </div>
 
           {/* TELEMETRY FEED CONSOLE CONTAINER */}
-          <div style={{ background: '#0F172A', border: '1px solid rgba(0,229,255,0.15)', borderRadius: '16px', padding: '16px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+          <div
+            style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              boxShadow: '0 0 20px rgba(0,229,255,0.15), 0 0 40px rgba(0,229,255,0.1)',
+              borderRadius: '16px',
+              padding: '16px',
+              transform: `rotateX(${logsTiltY}deg) rotateY(${logsTiltX}deg)`,
+              transition: 'transform 0.2s ease'
+            }}
+            onMouseMove={(e) => {
+              const { clientX, clientY } = e;
+              const { width, height, left, top } = e.currentTarget.getBoundingClientRect();
+              const x = clientX - (left + width / 2);
+              const y = clientY - (top + height / 2);
+              const tiltX = (y / (height / 2)) * 5; // max 5 degrees
+              const tiltY = (x / (width / 2)) * 5;
+              setLogsTiltX(tiltX);
+              setLogsTiltY(tiltY);
+            }}
+            onMouseLeave={() => {
+              setLogsTiltX(0);
+              setLogsTiltY(0);
+            }}
+          >
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '100%', background: 'linear-gradient(to bottom, transparent 45%, rgba(0,229,255,0.02) 50%, transparent 55%)', animation: 'scanline 6s linear infinite', pointerEvents: 'none' }} />
 
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px', zIndex: 5 }}>
               <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#00E5FF' }}>📡 SWARM LIVE ENDPOINT STREAM LOGS</span>
               <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
-                <button onClick={() => setIsScanning(!isScanning)} style={{ background: 'rgba(0,229,255,0.1)', border: '1px solid #00E5FF', color: '#00E5FF', borderRadius: '4px', fontSize: '9px', padding: '2px 6px', cursor: 'pointer' }}>
+                <button onClick={() => setIsScanning(!isScanning)} style={{ background: 'rgba(0,229,255,0.1)', border: '1px solid #00E5FF', color: '#00E5FF', borderRadius: '4px', fontSize: '9px', padding: '2px 6px', cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                   {isScanning ? "PAUSE" : "RESUME"}
                 </button>
-                <button onClick={triggerDownloadLog} style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid #22C55E', color: '#22C55E', borderRadius: '4px', fontSize: '9px', padding: '2px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <button onClick={triggerDownloadLog} style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid #22C55E', color: '#22C55E', borderRadius: '4px', fontSize: '9px', padding: '2px 6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '2px', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}>
                   <Download size={8} /> EXTRACT
                 </button>
               </div>
@@ -487,38 +549,7 @@ export default function App() {
 
         {/* MIDDLE LAYER CENTER: DYNAMIC FORENSIC ORB */}
         <div style={{ flex: '1.8 1 500px', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
-          <div style={{ background: 'radial-gradient(circle at center, #0B132B 0%, #050816 100%)', border: '1px solid rgba(0,229,255,0.15)', borderRadius: '24px', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', minHeight: '260px' }}>
-            <div style={{ display: 'flex', gap: '8px', position: 'absolute', top: '16px', zIndex: 10 }}>
-              <span style={{ fontSize: '10px', border: '1px solid #22C55E', color: '#22C55E', padding: '2px 8px', borderRadius: '12px', background: 'rgba(34,197,94,0.05)' }}>PAN: OK</span>
-              <span style={{ fontSize: '10px', border: '1px solid #EF4444', color: '#EF4444', padding: '2px 8px', borderRadius: '12px', background: 'rgba(239,68,68,0.05)' }}>GST STATE</span>
-            </div>
-
-            <div style={{ position: 'relative', width: '150px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '15px 0' }}>
-              <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px dashed rgba(0, 229, 255, 0.5)', animation: 'spinCW 16s linear infinite' }} />
-              <div style={{ position: 'absolute', inset: '12px', borderRadius: '50%', border: '2px dotted rgba(239, 68, 68, 0.4)', animation: 'spinCCW 10s linear infinite' }} />
-              <div style={{ position: 'absolute', inset: '24px', borderRadius: '50%', background: 'conic-gradient(from 0deg, rgba(0,229,255,0.08) 0deg, transparent 120deg)', animation: 'spinCW 5s linear infinite' }} />
-              <div style={{ position: 'absolute', width: '70px', height: '70px', borderRadius: '50%', background: 'radial-gradient(circle, #00E5FF 0%, #0F172A 75%)', border: '3px solid #00E5FF', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'pulseNeon 2s ease-in-out infinite' }}>
-                <span style={{ color: '#00E5FF', fontWeight: 'bold', fontSize: '11px', letterSpacing: '0.05em' }}>CORE</span>
-                {metrics.frozen && (
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    color: '#FF0000',
-                    textShadow: '0 0 10px rgba(255, 0, 0, 0.7)',
-                    animation: 'blink 1s ease-in-out infinite'
-                  }}>
-                    [ASSETS FROZEN]
-                  </div>
-                )}
-              </div>
-            </div>
-            <div style={{ fontSize: '11px', color: '#00E5FF', zIndex: 5 }}><Activity size={12} style={{ display: 'inline', marginRight: '4px' }} /> SWARM HARDENED KERNEL PIPELINE ACTIVE</div>
-          </div>
+          <HolographicOrb vendor={vendor} metrics={metrics} />
 
           {/* ACTIVE DETAILS NAVIGATION LAYERS */}
           <div style={{ background: '#0F172A', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', padding: '16px' }}>
@@ -563,7 +594,33 @@ export default function App() {
               <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#FFF' }}>DECISION INTELLIGENCE OPERATOR HUB</span>
             </div>
 
-            <div style={{ background: '#050816', borderRadius: '12px', padding: '14px', marginBottom: '16px', border: '1px solid rgba(255,255,255,0.02)' }}>
+            <div
+              style={{
+                background: 'rgba(15, 23, 42, 0.6)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                boxShadow: '0 0 20px rgba(0,229,255,0.15), 0 0 40px rgba(0,229,255,0.1)',
+                borderRadius: '12px',
+                padding: '14px',
+                marginBottom: '16px',
+                transform: `rotateX(${targetCaseTiltY}deg) rotateY(${targetCaseTiltX}deg)`,
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseMove={(e) => {
+                const { clientX, clientY } = e;
+                const { width, height, left, top } = e.currentTarget.getBoundingClientRect();
+                const x = clientX - (left + width / 2);
+                const y = clientY - (top + height / 2);
+                const tiltX = (y / (height / 2)) * 5; // max 5 degrees
+                const tiltY = (x / (width / 2)) * 5;
+                setTargetCaseTiltX(tiltX);
+                setTargetCaseTiltY(tiltY);
+              }}
+              onMouseLeave={() => {
+                setTargetCaseTiltX(0);
+                setTargetCaseTiltY(0);
+              }}
+            >
               <div style={{ fontSize: '10px', color: '#64748B' }}>TARGET CASE ENTITY</div>
               <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#00E5FF', marginTop: '2px' }}>{selectedVendorName}</div>
 
@@ -597,7 +654,7 @@ export default function App() {
 
               <button
                 onClick={() => setEscalationBanner(`🚨 ENFORCEMENT ACTION FORENSICS RECORD DISPATCHED FOR ENTITY -> ${selectedVendorName.toUpperCase()}`)}
-                style={{ width: '100%', background: '#EF4444', color: '#FFF', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '1px' }}
+                style={{ width: '100%', background: '#EF4444', color: '#FFF', border: 'none', padding: '10px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontFamily: 'monospace', letterSpacing: '1px', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
               >
                 TRIGGER ENFORCEMENT REPORT DISPATCH
               </button>
@@ -834,7 +891,8 @@ export default function App() {
                     borderRadius: '4px',
                     fontSize: '9px',
                     padding: '2px 6px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
                   Cancel
@@ -849,7 +907,8 @@ export default function App() {
                     fontSize: '9px',
                     padding: '2px 6px',
                     cursor: 'pointer',
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 >
                   Add Organization
