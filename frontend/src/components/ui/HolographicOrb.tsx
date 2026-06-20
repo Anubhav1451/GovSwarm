@@ -52,7 +52,7 @@ const HolographicOrb: React.FC<HolographicOrbProps> = ({ vendor, metrics }) => {
 
   const OrbContent = ({ orbColor, pulse, rotationSpeed }: { orbColor: string; pulse: number; rotationSpeed: number }) => {
     const sphereRef = useRef<any>(null);
-    useFrame((state, delta) => {
+    useFrame((_, delta) => {
       if (sphereRef.current) {
         // Rotate the sphere
         sphereRef.current.rotation.x += rotationSpeed * delta;
@@ -80,8 +80,9 @@ const HolographicOrb: React.FC<HolographicOrbProps> = ({ vendor, metrics }) => {
             emissiveIntensity: pulse * 0.5,
             roughness: 0.2,
             metalness: 0.8,
-          }}
-        />
+          } as any
+        }>
+        </Sphere>
         {/* Central holographic core */}
         <mesh>
           <sphereGeometry args={[1.2, 32, 32]} />

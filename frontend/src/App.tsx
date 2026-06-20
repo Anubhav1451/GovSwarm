@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShieldAlert, Search, Bell, Cpu, AlertTriangle, Activity, Download, Terminal, Network, Shield, Mic, Upload } from 'lucide-react';
+import { ShieldAlert, Search, Bell, Activity, Download, Terminal, Shield, Mic, Upload } from 'lucide-react';
 import SwarmGraph from './features/investigations/SwarmGraph';
 import HolographicOrb from './components/ui/HolographicOrb';
 
@@ -22,22 +22,6 @@ const AnimationStyles = () => (
 // Unified Backend Base Endpoint
 const API_BASE = "http://localhost:8000/api/v1";
 
-const vendorDatabase = {
-  "Vardhaman Infra Solutions": {
-    riskScore: 68,
-    activeNodes: 12847,
-    highRiskAlerts: 184,
-    complianceShield: "92.4%",
-    pendingReviews: 73
-  },
-  "SecureLogix Labs": {
-    riskScore: 12,
-    activeNodes: 15000,
-    highRiskAlerts: 5,
-    complianceShield: "99.5%",
-    pendingReviews: 2
-  }
-};
 
 interface LiveMetrics {
   nodes?: string;
@@ -66,22 +50,12 @@ export default function App() {
   const vendor = selectedVendorName;
 
   // Speech recognition state
-  const [speechRecognition, setSpeechRecognition] = useState<SpeechRecognition | null>(null);
+  const [speechRecognition, setSpeechRecognition] = useState<any | null>(null);
   const [isListening, setIsListening] = useState<boolean>(false);
-  // Compliance mask state
-  const [complianceMask, setComplianceMask] = useState(false);
   // Critical alert toast state
   const [showCriticalToast, setShowCriticalToast] = useState(false);
-  const [opHubHeaderTiltX, setOpHubHeaderTiltX] = useState(0);
-  const [opHubHeaderTiltY, setOpHubHeaderTiltY] = useState(0);
   const [targetCaseTiltX, setTargetCaseTiltX] = useState(0);
   const [targetCaseTiltY, setTargetCaseTiltY] = useState(0);
-  const [threatScoreTiltX, setThreatScoreTiltX] = useState(0);
-  const [threatScoreTiltY, setThreatScoreTiltY] = useState(0);
-  const [escalationMandateTiltX, setEscalationMandateTiltX] = useState(0);
-  const [escalationMandateTiltY, setEscalationMandateTiltY] = useState(0);
-  const [documentVaultTiltX, setDocumentVaultTiltX] = useState(0);
-  const [documentVaultTiltY, setDocumentVaultTiltY] = useState(0);
   const [matrixTiltX, setMatrixTiltX] = useState(0);
   const [matrixTiltY, setMatrixTiltY] = useState(0);
   const [logsTiltX, setLogsTiltX] = useState(0);
@@ -241,7 +215,7 @@ export default function App() {
       // Add a random log entry
       const randomLog = `📡 [TELEMETRY] -> Random packet ${Math.floor(Math.random() * 1000)} received at ${new Date().toLocaleTimeString()}`;
       setLogs(prev => {
-        const newLogs = [...prev, randomLog];
+        let newLogs = [...prev, randomLog];
         if (newLogs.length > 500) newLogs = newLogs.slice(-500);
         return newLogs;
       });
@@ -268,7 +242,7 @@ export default function App() {
   // Initialize speech recognition
   useEffect(() => {
     // Check if SpeechRecognition is available in the browser
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
@@ -296,7 +270,7 @@ export default function App() {
         setIsListening(false);
       };
 
-      recognition.onerror = (event: SpeechRecognitionError) => {
+      recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
       };
@@ -373,7 +347,6 @@ export default function App() {
   if (riskPercent < 50) riskBarColor = '#22C55E';
   else if (riskPercent < 80) riskBarColor = '#F59E0B';
 
-  const steps = ["Data Ingestion", "Entity Extraction", "Registry Match", "Compliance Audit", "Risk Profiling", "Intel Report"];
 
   return (
     <div style={{
@@ -662,22 +635,22 @@ export default function App() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px', fontSize: '11px' }}>
                 <div>GSTIN: <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>{metrics.gstStatus || (() => {
-  const map = {
+  const gstMap: Record<string, string> = {
     "Vardhaman Infra Solutions": "27AABCU9603R1Z5 ACTIVE",
     "Apex Cyber Defense": "29AABCU9603R2Z6 ACTIVE",
     "Matrix Shell Logistics": "27AABCU9603R1Z5 SUSPENDED",
     "SecureLogix Labs": "30AABCU9603R3Z7 ACTIVE"
   };
-  return map[selectedVendorName] || "27AABCU9603R1Z5 ACTIVE";
+  return gstMap[selectedVendorName] || "27AABCU9603R1Z5 ACTIVE";
 })()}</span></div>
                 <div>PAN STATUS: <span style={{ color: '#38BDF8', fontWeight: 'bold' }}>{metrics.panStatus || (() => {
-  const map = {
+  const panMap: Record<string, string> = {
     "Vardhaman Infra Solutions": "AABCU9603R1 VERIFIED",
     "Apex Cyber Defense": "AABCU9603R2 VERIFIED",
     "Matrix Shell Logistics": "AABCU9603R FAILED",
     "SecureLogix Labs": "AABCU9603R3 VERIFIED"
   };
-  return map[selectedVendorName] || "AABCU9603R1 VERIFIED";
+  return panMap[selectedVendorName] || "AABCU9603R1 VERIFIED";
 })()}</span></div>
                 <div style={{ gridColumn: 'span 2', color: '#EF4444', fontWeight: 'bold' }}>{metrics.mcaStatus || "Verifying structural roster..."}</div>
               </div>
@@ -913,18 +886,18 @@ export default function App() {
                   style={{
                     width: '100%',
                     padding: '8px',
-                    background: '#FFFFFF',
+                    backgroundColor: '#FFFFFF',
+                    color: '#111827',
                     border: '1px solid rgba(0,229,255,0.3)',
                     borderRadius: '4px',
-                    color: '#1A202C',
                     fontFamily: 'monospace',
                     fontSize: '13px'
                   }}
                 >
-                  <option value="" style={{ color: '#1A202C' }}>Select status</option>
-                  <option value="Compliant" style={{ color: '#1A202C' }}>Compliant</option>
-                  <option value="Non-Compliant" style={{ color: '#1A202C' }}>Non-Compliant</option>
-                  <option value="Under Review" style={{ color: '#1A202C' }}>Under Review</option>
+                  <option value="" style={{ color: '#111827' }}>Select status</option>
+                  <option value="Compliant" style={{ color: '#111827' }}>Compliant</option>
+                  <option value="Non-Compliant" style={{ color: '#111827' }}>Non-Compliant</option>
+                  <option value="Under Review" style={{ color: '#111827' }}>Under Review</option>
                 </select>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '24px' }}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Terminal, Play, Cpu } from 'lucide-react';
 
 export default function CopilotPanel() {
